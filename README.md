@@ -2,20 +2,22 @@
 
 GPS predicts IPv4 services across all 65K ports. 
 GPS uses application, transport, and network layer features to probabilistically model and predict service presence.
-To scan the predicted services, GPS relies on existing Internet scanners such as [LZR](https://github.com/stanford-esrg/lzr).
-To compute predictions, this implementation of GPS uses Google [BigQuery](http://bigquery.cloud.google.com). 
+GPS computes service predictions in 13 minutes. 
+GPS can find 92.5\% of all services across all ports with 131x less bandwidth, and 204x more precision, compared to exhaustive scanning. 
 
 To learn more about GPS' system and performance, check out the original [paper] appearing at [Sigcomm '22](https://conferences.sigcomm.org/sigcomm/2022/).
 
 ## GPS Computational Requirements
 
-In this repository we provide a GPS implementation in python that uses Google BigQuery as its back-end computing source.
+To scan the predicted services, GPS relies on existing Internet scanners such as [LZR](https://github.com/stanford-esrg/lzr).
+To compute predictions, this implementation of GPS uses Google [BigQuery](http://bigquery.cloud.google.com). 
+
 
 To run GPS, you need the following capabilities:
 - Python v3
 - Access to Google [BigQuery](http://bigquery.cloud.google.com) and the [google cloud command line](https://cloud.google.com/sdk/docs/install).
 Users are responsible for their own billing. 
-As long as intermediate tables are not stored in Google BigQuery for longer than GPS' execution, then the total cost of running GPS on BigQuery should be less than \$1. 
+As long as intermediate tables are not stored in Google BigQuery for longer than GPS' execution, the total cost of BigQuery should be less than \$1. 
 - Access to an Internet scanner (e.g.,[LZR](https://github.com/stanford-esrg/lzr)) and Internet scanning infrastructure. Please make sure to adhere to [these](https://github.com/zmap/zmap/wiki/Scanning-Best-Practices) scanning best practices.
 - Access to a large disk (e.g., 1TB). The final list of service predictions generates a file that is larger than half a terabyte in size. 
 
@@ -34,14 +36,14 @@ GPS uses a `config.ini` configuration file which expects users to specify:
 GPS relies on an initial seed scan---a sub-sampled (e.g., 1\%) IPv4 scan across all 65K ports---to learn patterns from. 
 A sample seed scan (1\% IPv4 LZR scan across all 65K ports collected in April 2021) can be found [here].
 The seed scan has been filtered for real services (i.e., services that send back real data) and hosts that respond on 10 or less ports (i.e., removing pseudo services). 
-Please see the [LZR paper](https://lizizhikevich.github.io/assets/papers/lzr.pdf) and the GPS paper for more details behind this methodology. 
+Please see the [LZR paper](https://lizizhikevich.github.io/assets/papers/lzr.pdf) and the [GPS paper] for more details behind this methodology. 
 
 The sample seed scan should just be used for testing purposes.
 Using this data means that GPS will predict services given the state of the Internet from April 2021. 
 To make up-to-date predictions, please use an up-to-date seed scan. 
 
-To use the sample seed scan, upload it to BigQuery and update the seed table name in `config.ini`.
-You can use the following command-line big query command:
+To use the sample seed scan, upload it to BigQuery and update the seed BigQuery table name in `config.ini` (i.e., ``Seed_Table = lzr_seed_april2021_filt``).
+The following command-line big query command uploads the seed scan, `lzr_seed_april2021_filt.json` to BigQuery:
 ```
 bq load --source_format NEWLINE_DELIMITED_JSON --autodetect \
       BQ_RESOURCE_PROJECT.BQ_DATASET.SEED_TABLE lzr_seed_april2021_filt.json
@@ -62,7 +64,7 @@ At minimum, to compute predictions, the gps algorithm expects an ip address, a p
 
 ## Running GPS
 
-Once the ``config.ini`` is properly set, and a valid seed scan has been uploaded to BigQuery, GPS is ready to predict services.
+Once the ``config.ini`` is properly initialized, and a valid seed scan has been uploaded to BigQuery, GPS is ready to predict services.
 
 GPS prediction works in two phases:
 
@@ -81,12 +83,14 @@ During runtime, GPS provides user instructions for how to best download that lar
 
 When adding functionality to GPS, the user may run into the following Big Query errors: 
 
-``400 Resources exceeded during query execution: Not enough resources for query planning - too many subqueries or query is too complex.''
-    
+```
+400 Resources exceeded during query execution: Not enough resources for query planning - too many subqueries or query is too complex.
+```
+
 Why it happened: This message means that the query has become too long/nested for BigQuery to process. 
 This can happen if you have added more features, or added more code that calls the defined sub-tables.
 
-Solution: Reduce the amount of queries that are defined as sub-tables. Or split the query in two and run them seperately (saving to a destination table in the process. 
+Solution: Reduce the amount of queries that are defined as sub-tables or split the query in two and run them seperately (saving to a destination table in the process). This will require some hacking on the GPS source code.  
 
 
 

@@ -5,7 +5,7 @@ GPS uses application, transport, and network layer features to probabilistically
 GPS computes service predictions in 13 minutes. 
 GPS can find 92.5\% of all services across all ports with 131x less bandwidth, and 204x more precision, compared to exhaustive scanning. 
 
-To learn more about GPS' system and performance, check out the original [paper] appearing at [Sigcomm '22](https://conferences.sigcomm.org/sigcomm/2022/).
+To learn more about GPS' system and performance, check out the original [paper](https://lizizhikevich.github.io/assets/papers/gps.pdf) appearing at [Sigcomm '22](https://conferences.sigcomm.org/sigcomm/2022/).
 
 ## GPS Computational Requirements
 
@@ -36,7 +36,7 @@ GPS uses a `config.ini` configuration file which expects users to specify:
 GPS relies on an initial seed scan---a sub-sampled (e.g., 1\%) IPv4 scan across all 65K ports---to learn patterns from. 
 A sample seed scan (1\% IPv4 LZR scan across all 65K ports collected in April 2021) can be found [here].
 The seed scan has been filtered for real services (i.e., services that send back real data) and hosts that respond on 10 or less ports (i.e., removing pseudo services). 
-Please see the [LZR paper](https://lizizhikevich.github.io/assets/papers/lzr.pdf) and the [GPS paper] for more details behind this methodology. 
+Please see the [LZR paper](https://lizizhikevich.github.io/assets/papers/lzr.pdf) and the [GPS paper](https://lizizhikevich.github.io/assets/papers/gps.pdf) for more details behind this methodology. 
 
 The sample seed scan should just be used for testing purposes.
 Using this data means that GPS will predict services given the state of the Internet from April 2021. 

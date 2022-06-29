@@ -79,6 +79,9 @@ To run GPS' second phase, simply run the following:
 GPS saves a large list of individual services for the user to scan. 
 During runtime, GPS provides user instructions for how to best download that large list.
 
+Once GPS is done running, remember to delete any remaining BigQuery tables that are not desired to have around.
+GPS does not automatically clean up BigQuery tables, in case the user wants to use/explore the intermediate tables.
+
 ## Debugging
 
 When adding functionality to GPS, the user may run into the following Big Query errors: 

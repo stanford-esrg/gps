@@ -244,5 +244,6 @@ if not GPS_PART1:
             PRED_RESULTS_TABLE + "gs://bucket/filename.csv")
     print("------gsutil cp gs://bucket/filename.csv " + DATAPATH )  
     print("------Then Internet scan all the services in the prediction results list")
+	print("!!!!!!Remember to eventually delete the generated GPS tables from BigQuery!!!!!!")  
     sys.exit()
 

@@ -18,7 +18,7 @@ To run GPS, you need the following capabilities:
 - Access to Google [BigQuery](http://bigquery.cloud.google.com) and the [google cloud command line](https://cloud.google.com/sdk/docs/install).
 Users are responsible for their own billing. 
 As long as intermediate tables are not stored in Google BigQuery for longer than GPS' execution, the total cost of BigQuery should be less than \$1. 
-- Access to an Internet scanner (e.g.,[LZR](https://github.com/stanford-esrg/lzr)) and Internet scanning infrastructure. Please make sure to adhere to [these](https://github.com/zmap/zmap/wiki/Scanning-Best-Practices) scanning best practices.
+- Access to an Internet scanner (e.g., [LZR](https://github.com/stanford-esrg/lzr)) and Internet scanning infrastructure. Please make sure to adhere to [these](https://github.com/zmap/zmap/wiki/Scanning-Best-Practices) scanning best practices.
 - Access to a large disk (e.g., 1TB). The final list of service predictions generates a file that is larger than half a terabyte in size. 
 
 ## Configuring GPS Parameters

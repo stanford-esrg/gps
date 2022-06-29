@@ -1,82 +1,81 @@
 # GPS: Predicting IPv4 Services Across All Ports
 
 GPS predicts IPv4 services across all 65K ports. 
-GPS works with scanners such as [LZR](https://github.com/stanford-esrg/lzr) and relies on Google [BigQuery](http://bigquery.cloud.google.com) to compute predictions.
+GPS uses application, transport, and network layer features to probabilistically model and predict service presence.
+To scan the predicted services, GPS relies on existing Internet scanners such as [LZR](https://github.com/stanford-esrg/lzr).
+To compute predictions, this implementation of GPS uses Google [BigQuery](http://bigquery.cloud.google.com). 
 
 To learn more about GPS' system and performance, check out the original [paper] appearing at [Sigcomm '22](https://conferences.sigcomm.org/sigcomm/2022/).
 
 ## GPS Computational Requirements
 
-In this repository we provide a GPS implementation which uses Google BigQuery as its back-end.
+In this repository we provide a GPS implementation in python that uses Google BigQuery as its back-end computing source.
 
 To run GPS, you need the following capabilities:
-- Access to Google Big Query
-- Access to Internet scanning infrastructure
+- Python v3
+- Access to Google [BigQuery](http://bigquery.cloud.google.com) and the [google cloud command line](https://cloud.google.com/sdk/docs/install).
+Users are responsible for their own billing. 
+As long as intermediate tables are not stored in Google BigQuery for longer than GPS' execution, then the total cost of running GPS on BigQuery should be less than \$1. 
+- Access to an Internet scanner (e.g.,[LZR](https://github.com/stanford-esrg/lzr)) and Internet scanning infrastructure. Please make sure to adhere to [these](https://github.com/zmap/zmap/wiki/Scanning-Best-Practices) scanning best practices.
+- Access to a large disk (e.g., 1TB). The final list of service predictions generates a file that is larger than half a terabyte in size. 
 
 ## Configuring GPS Parameters
 
-Config file
-The beginning of main.py specifies multiple todos in which the user
-is expected to spectify their Big Query account, the BQ dataset they plan to use,
-the table name to which the seed scan was uploaded, where intermediate data is to
-be stored, as well as other GPS configurations. 
+GPS uses a `config.ini` configuration file which expects users to specify:
+1. a Big Query account
+2. an existing BQ dataset that GPS can store tables to
+3. the table name to which the seed scan was uploaded to (see below)
+4. a local directory of where GPS can store predictions
+5. other GPS parameters (e.g., minimum hitrate)
+
+
+## Seed Scan:
+
+GPS relies on an initial seed scan---a sub-sampled (e.g., 1\%) IPv4 scan across all 65K ports---to learn patterns from. 
+A sample seed scan (1\% IPv4 LZR scan across all 65K ports collected in April 2021) can be found [here].
+The seed scan has been filtered for real services (i.e., services that send back real data) and hosts that respond on 10 or less ports (i.e., removing pseudo services). 
+Please see the [LZR paper](https://lizizhikevich.github.io/assets/papers/lzr.pdf) and the GPS paper for more details behind this methodology. 
+
+The sample seed scan should just be used for testing purposes.
+Using this data means that GPS will predict services given the state of the Internet from April 2021. 
+To make up-to-date predictions, please use an up-to-date seed scan. 
+
+To use the sample seed scan, upload it to BigQuery and update the seed table name in `config.ini`.
+You can use the following command-line big query command:
+```
+bq load --source_format NEWLINE_DELIMITED_JSON --autodetect \
+      BQ_RESOURCE_PROJECT.BQ_DATASET.SEED_TABLE lzr_seed_april2021_filt.json
+```
+
+### Using your own seed scan:
+
+The GPS code base currently supports two formats of Interent scans to be used as the seed:
+1. The raw output of a [LZR](https://github.com/stanford-esrg/lzr) scan. 
+GPS then re-formats it when ``Pre_Filt_Seed=False`` is set in the config.ini. 
+3. A scan with the following schema:
+```
+ip (string), p (port number- integer), asn (integer), data (string),\
+fingerprint (protocol - string), w (tcp window size-integer).
+```
+Fields can be added or removed, as long as ``src/data_features.py`` is appropriately updated. 
+At minimum, to compute predictions, the gps algorithm expects an ip address, a port number, and some form of layer 7 data for each service.
 
 ## Running GPS
 
+Once the ``config.ini`` is properly set, and a valid seed scan has been uploaded to BigQuery, GPS is ready to predict services.
+
 GPS prediction works in two phases:
-(1) GPS predicts at least one service across all hosts.
-(2) GPS predicts all remaining services on every host it has discovered in the first phase.
 
+1. GPS predicts at least one service across all IPv4 hosts. 
+To run GPS' first phase, simply run the following:
+``python gps.py first``
+GPS outputs and downloads locally a short list of sub-networks and ports for the user to scan.
 
-Thus, the user must specify which phase of GPS to run:
-
-```
-python gps.py first
-```
-or 
-```
-python gps.py remaining
-```
-
-
-## Seed Scan Input:
-
-We provide in the data/ foler a sample seed scan (1% ipv4 lzr scan across all 65K ports) collected in April 2021. The seed scan has been filtered for real services (i.e., services that send back real data) and hosts that respond on 10 or less ports (i.e., removing pseudo services). Please see the LZR paper and the GPS paper for more details behind this methodology. 
-#### todo add section numbers
-
-To use this seed scan, upload it to BigQuery and update the seed table name in main.py.
-You can use the following command-line big query command:
-
-bq load --source_format NEWLINE_DELIMITED_JSON --autodetect \
-      BQ_RESOURCE_PROJECT.BQ_DATASET.SEED_TABLE lzr_seed_april2021_filt.json
-
-
-
-The dataset should just be used for testing purposes.
-Using this data means that GPS will predict services given the state of the Internet from April 2021. 
-To make up-to-date predictions, please use an up-to-date seed scan. 
-#### todo add section numbers for size of a seed scan
-
-
-### When using your own seed scan:
-
-The code base currently supports two formats of Interent scans to be used as the seed:
-(1) The raw output of a LZR scan. GPS then re-formats it as a "step 0"
-or
-(2) An already correctly formatted scan. GPS expects the following format:
-ip (string), p (port number- integer), asn (integer), data (string), fingerprint (protocol - string), w (tcp window size-integer).
-
-At minimum, the gps algorithm expects ip, p, data.
-
-Note that fields can be added or removed, but the appropriate features should be added or removed as well in main.py: 
-
-usedFeatures = [TLS_OID, TLS_CERT, HTTP_LINES, FINGERPRINT, WINDOW, SSH]
-Each of those features are defined in data_features.py
-
-If removing the ASN feature, then set useASN to false in main.py. 
-
-
-
+3. GPS predicts any remaining services on every host it has discovered in the first phase. 
+To run GPS' second phase, simply run the following:
+``python gps.py remaining``
+GPS saves a large list of individual services for the user to scan. 
+During runtime, GPS provides user instructions for how to best download that large list.
 
 ## Debugging
 

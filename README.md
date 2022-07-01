@@ -9,10 +9,6 @@ To learn more about GPS' system and performance, check out the original [paper](
 
 ## GPS Computational Requirements
 
-To scan the predicted services, GPS relies on existing Internet scanners such as [LZR](https://github.com/stanford-esrg/lzr).
-To compute predictions, this implementation of GPS uses Google [BigQuery](http://bigquery.cloud.google.com). 
-
-
 To run GPS, you need the following capabilities:
 - Python v3
 - Access to Google [BigQuery](http://bigquery.cloud.google.com) and the [google cloud command line](https://cloud.google.com/sdk/docs/install).
@@ -99,7 +95,7 @@ Solution: Reduce the amount of queries that are defined as sub-tables or split t
 
 ## License and Copyright
 
-Copyright 2020 The Board of Trustees of The Leland Stanford Junior University
+Copyright 2022 The Board of Trustees of The Leland Stanford Junior University
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

@@ -29,7 +29,7 @@ GPS uses a `config.ini` configuration file which expects users to specify:
 
 ## Seed Scan:
 
-GPS relies on an initial seed scan---a sub-sampled (e.g., 1\%) IPv4 scan across all 65K ports---to learn patterns from. 
+GPS relies on an initial seed scan---a sub-sampled IPv4 scan across all 65K ports---to learn patterns from. 
 A sample seed scan (1\% IPv4 LZR scan across all 65K ports collected in April 2021) can be found [here](https://www.dropbox.com/s/u8pq85ig557shw4/lzr_seed_april2021_filt.json?dl=0).
 The seed scan has been filtered for real services (i.e., services that send back real data) and hosts that respond on 10 or less ports (i.e., removing pseudo services). 
 Please see the [LZR paper](https://lizizhikevich.github.io/assets/papers/lzr.pdf) and the [GPS paper](https://lizizhikevich.github.io/assets/papers/gps.pdf) for more details behind this methodology. 

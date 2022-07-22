@@ -1,6 +1,6 @@
 # GPS: Predicting IPv4 Services Across All Ports
 
-GPS predicts IPv4 services across all 65K ports. 
+GPS is a scanning platform that learns and predicts the location of IPv4 services across all 65K ports.
 GPS uses application, transport, and network layer features to probabilistically model and predict service presence.
 GPS computes service predictions in 13 minutes. 
 GPS can find 92.5\% of all services across all ports with 131x less bandwidth, and 204x more precision, compared to exhaustive scanning. 

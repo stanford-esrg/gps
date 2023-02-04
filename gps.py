@@ -147,7 +147,7 @@ if GPS_PART1:
 #**************************************************
 
 if GPS_PART1:
-    for STEP in [16]:
+    for STEP in [STEP_SIZE]:
     
         SCANNING_PLAN_CSV = SCANNING_PLAN+str(STEP)+".csv"
 

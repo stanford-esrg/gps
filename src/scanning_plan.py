@@ -55,4 +55,4 @@ def calcBandwidthNeeded(scanning_plan_df,step):
     #extract the size of subnet
     numSlashes = len(scanning_plan_df.index)
     
-    return math.pow(2,32-step)*numSlashes
+    return math.pow(2,32-int(step))*numSlashes
